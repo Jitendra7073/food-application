@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 class OffersPage extends StatelessWidget {
   final offers = [
-    {'img': 'assets/img/breakfast.jpg', 'title': 'Café de Noires'},
-    {'img': 'assets/img/salad.jpg', 'title': 'Isso'},
-    {'img': 'assets/img/coffee.jpg', 'title': 'Cafe Beans'},
+    {'img': 'assets/img/offer_1.jpg', 'title': 'Café de Noires'},
+    {'img': 'assets/img/offer_2.jpg', 'title': 'Isso'},
+    {'img': 'assets/img/offer_3.jpg', 'title': 'Cafe Beans'},
   ];
 
   OffersPage({super.key});

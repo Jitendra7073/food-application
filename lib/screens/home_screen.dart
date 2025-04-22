@@ -1,21 +1,41 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-
+import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
 import '../pages/menu_page.dart';
 import '../pages/home_page.dart';
 import '../pages/offers_page.dart';
 import '../pages/profile_page.dart';
 import '../pages/more_page.dart';
+import '../pages/cart_provider.dart';
+
+void main() {
+  void main() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    await Firebase.initializeApp();
+
+    runApp(
+      ChangeNotifierProvider(
+        create: (_) => CartProvider(),
+        child: const HomeScreen(),
+      ),
+    );
+  }
+
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => CartProvider(),
+      child: const HomeScreen(),
+    ),
+  );
+}
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // final user = FirebaseAuth.instance.currentUser;
-
-    return Scaffold(
-      body: const BottomNav(),
+    return const Scaffold(
+      body: BottomNav(),
     );
   }
 }

@@ -1,7 +1,56 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-class HomePage extends StatelessWidget {
+import 'location_picker_page.dart'; // Make sure this path is correct
+
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  String _userAddress = 'Select your delivery address';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAddress();
+  }
+
+  Future<void> _loadAddress() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      DocumentSnapshot snap = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      setState(() {
+        _userAddress = snap['address'] ?? 'Select your delivery address';
+      });
+    }
+  }
+
+  Future<void> _navigateToLocationPicker() async {
+    final selectedAddress = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const LocationPickerPage()),
+    );
+
+    if (selectedAddress != null) {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .set({'address': selectedAddress}, SetOptions(merge: true));
+        setState(() => _userAddress = selectedAddress);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -12,20 +61,47 @@ class HomePage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Good morning Akul',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-              SizedBox(height: 12),
+              GestureDetector(
+                onTap: _navigateToLocationPicker,
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.shade100,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.location_on, color: Colors.orange),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _userAddress,
+                          style: const TextStyle(fontSize: 16),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const Icon(Icons.arrow_forward_ios, size: 16),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'Good morning Akul',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
               TextField(
                 decoration: InputDecoration(
                   hintText: 'Search your meal...',
-                  prefixIcon: Icon(Icons.search),
+                  prefixIcon: const Icon(Icons.search),
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16)),
                   fillColor: Colors.grey[200],
                   filled: true,
                 ),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               _sectionTitle('Popular Restaurants'),
               _buildImageCard('assets/img/pizza.jpg', 'Milano Pizza'),
               _buildImageCard('assets/img/breakfast.jpg', 'Café & Bites'),
@@ -51,24 +127,25 @@ class HomePage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(title,
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            Text('View All', style: TextStyle(color: Colors.orange)),
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            const Text('View All', style: TextStyle(color: Colors.orange)),
           ],
         ),
       );
 
   Widget _buildImageCard(String imgPath, String title) => Container(
-        margin: EdgeInsets.only(bottom: 12),
+        margin: const EdgeInsets.only(bottom: 12),
         height: 180,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           image: DecorationImage(image: AssetImage(imgPath), fit: BoxFit.cover),
         ),
         alignment: Alignment.bottomLeft,
-        padding: EdgeInsets.all(12),
+        padding: const EdgeInsets.all(12),
         child: Text(
           title,
-          style: TextStyle(
+          style: const TextStyle(
               color: Colors.white,
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -82,6 +159,6 @@ class HomePage extends StatelessWidget {
           child: Image.asset(imgPath, width: 60, height: 60, fit: BoxFit.cover),
         ),
         title: Text(title),
-        subtitle: Text(price, style: TextStyle(color: Colors.orange)),
+        subtitle: Text(price, style: const TextStyle(color: Colors.orange)),
       );
 }

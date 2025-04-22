@@ -1,23 +1,12 @@
 import 'package:flutter/material.dart';
+import 'category_detail_page.dart';
 
 class MenuPage extends StatelessWidget {
-  final categories = [
-    {'title': 'Food', 'count': '120 items', 'img': 'assets/img/pizza.jpg'},
-    {
-      'title': 'Beverages',
-      'count': '220 items',
-      'img': 'assets/img/coffee.jpg'
-    },
-    {
-      'title': 'Desserts',
-      'count': '155 items',
-      'img': 'assets/img/dessert.jpg'
-    },
-    {
-      'title': 'Promotions',
-      'count': '25 items',
-      'img': 'assets/img/burger.jpg'
-    },
+  final List<CategoryItem> categories = [
+    CategoryItem("Food", "assets/img/menu_1.png", Colors.deepOrange),
+    CategoryItem("Beverages", "assets/img/menu_2.png", Colors.teal),
+    CategoryItem("Desserts", "assets/img/menu_3.png", Colors.purple),
+    CategoryItem("Promotions", "assets/img/menu_4.png", Colors.blue),
   ];
 
   MenuPage({super.key});
@@ -25,46 +14,49 @@ class MenuPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
+      backgroundColor: Colors.grey[100],
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.white,
+        title: const Text("Menu",
+            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+        actions: const [
+          Padding(
+            padding: EdgeInsets.only(right: 16.0),
+            child: Icon(Icons.shopping_cart, color: Colors.black),
+          ),
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: 'Search food',
-                  prefixIcon: Icon(Icons.search),
-                  filled: true,
-                  fillColor: Colors.grey[200],
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide.none),
+            TextField(
+              decoration: InputDecoration(
+                hintText: "Search food, drinks...",
+                prefixIcon: Icon(Icons.search),
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding:
+                    EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
                 ),
               ),
             ),
+            const SizedBox(height: 20),
             Expanded(
-              child: ListView.builder(
+              child: GridView.builder(
                 itemCount: categories.length,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemBuilder: (_, index) {
-                  final item = categories[index];
-                  return Card(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16)),
-                    margin: const EdgeInsets.only(bottom: 16),
-                    child: ListTile(
-                      leading: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.asset(item['img']!,
-                            width: 60, height: 60, fit: BoxFit.cover),
-                      ),
-                      title: Text(item['title']!,
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: Text(item['count']!),
-                      trailing:
-                          Icon(Icons.arrow_forward_ios, color: Colors.orange),
-                    ),
-                  );
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 20,
+                  crossAxisSpacing: 20,
+                  childAspectRatio: 1.1,
+                ),
+                itemBuilder: (context, index) {
+                  return _buildCategoryCard(context, categories[index]);
                 },
               ),
             ),
@@ -73,4 +65,45 @@ class MenuPage extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildCategoryCard(BuildContext context, CategoryItem item) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (_) => CategoryDetailPage(category: item.name)),
+          );
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            color: item.color.withOpacity(0.8),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset(item.image, height: 100),
+              const SizedBox(height: 10),
+              Text(item.name,
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class CategoryItem {
+  final String name;
+  final String image;
+  final Color color;
+
+  CategoryItem(this.name, this.image, this.color);
 }
